@@ -1,8 +1,12 @@
-fimport os
+import os
 import asyncio
+import nest_asyncio
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import Application, CommandHandler, CallbackContext
+
+# Aplicar patch para evitar errores de event loop en Replit
+nest_asyncio.apply()
 
 # Cargar variables de entorno desde .env
 load_dotenv()
@@ -33,9 +37,9 @@ async def main():
 
 # ✅ Manejo correcto del loop en Replit
 if __name__ == '__main__':
-    try:
-        asyncio.run(main())
-    except RuntimeError:
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(main())
-
+    loop = asyncio.get_event_loop()
+    if loop.is_running():
+        print("⚠️ El loop de eventos ya está en ejecución, usando create_task()")
+        loop.create_task(main())  # Ejecuta el bot sin cerrar el loop
+    else:
+        print("✅ Ejecutando asy
